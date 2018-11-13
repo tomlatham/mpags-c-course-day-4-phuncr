@@ -69,6 +69,9 @@ Available options:
   -o FILE          Write processed text to FILE
                    Stdout will be used if not supplied
 
+  -c CIPHER        Specify the cipher to be used to perform the encryption/decryption
+                   CIPHER can either be caesar or playfair - caesar is the default
+
   -k KEY           Specify the cipher KEY
                    A null key, i.e. no encryption, is used if not supplied
 
@@ -105,6 +108,8 @@ MPAGS-Code
 │   ├── CaesarCipher.cpp
 │   ├── CaesarCipher.hpp
 │   ├── CipherMode.hpp
+│   ├── PlayfairCipher.cpp
+│   ├── PlayfairCipher.hpp
 │   ├── ProcessCommandLine.cpp
 │   ├── ProcessCommandLine.hpp
 │   ├── TransformChar.cpp

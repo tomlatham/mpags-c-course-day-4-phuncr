@@ -3,7 +3,6 @@
 
 // Standard library includes
 #include <string>
-#include <vector>
 
 // Our project headers
 #include "CipherMode.hpp"

@@ -1,7 +1,5 @@
 // Standard library includes
-#include <iostream>
 #include <string>
-#include <vector>
 #include <algorithm>
 #include <cctype>
 
@@ -35,8 +33,8 @@ void PlayfairCipher::setKey( const std::string& key )
     // Change J -> I
     auto func2 = [] (char in_char)
     {
-        if(in_char=='J') return('I');
-        else return(in_char);
+        if(in_char=='J') {return('I');}
+        else {return(in_char);}
     };
     std::transform(key_.begin(), key_.end(), key_.begin(), func2);
 
@@ -49,7 +47,10 @@ void PlayfairCipher::setKey( const std::string& key )
             enc_lett += in_char;
             return(false);
         }
-        else return(true);
+        else
+        {
+            return(true);
+        }
     };
     auto iter2 = std::remove_if(key_.begin(), key_.end(), func3);
     key_.erase(iter2, key_.end());
@@ -87,50 +88,64 @@ std::string PlayfairCipher::applyCipher( const std::string& inputText, const Cip
 
     if(outputText.size()%2 != 0)
     {
-        outputText.push_back('Z');
+        outputText += (outputText.back() == 'Z') ? 'X' : 'Z';
     }
 
     // Loop over the input in Digraphs
     for( size_t i=0; i<outputText.size(); i+=2)
     {
         //   - Find the coords in the grid for each digraph
-        int index1 = key_.find(outputText[i]);
-        int index2 = key_.find(outputText[i+1]);
+        size_t index1 = key_.find(outputText[i]);
+        size_t index2 = key_.find(outputText[i+1]);
+
+        size_t row1 = index1/5;
+        size_t row2 = index2/5;
+
+        size_t column1 = index1%5;
+        size_t column2 = index2%5;
 
         //   - Apply the rules to these coords to get 'new' coords
-        if( (index2/5-index1/5)==0 )
+        if( row1 == row2 )
         {
+            // Row - so increment/decrement the column indices (modulo 5)
             if(cipherMode==CipherMode::Encrypt)
             {
-                outputText[i]   = key_[index1+((index1%5==4)?(-4):(1))];
-                outputText[i+1] = key_[index2+((index2%5==4)?(-4):(1))];
+                column1 = (column1 + 1) % 5;
+                column2 = (column2 + 1) % 5;
             }
             else
             {
-                outputText[i]   = key_[index1+((index1%5==0)?(4):(-1))];
-                outputText[i+1] = key_[index2+((index2%5==0)?(4):(-1))];
+                column1 = (5 + column1 - 1) % 5;
+                column2 = (5 + column2 - 1) % 5;
             }
         }      
-        else if( abs(index2-index1)%5 == 0  )
+        else if( column1 == column2  )
         {
+            // Column - so increment/decrement the row indices (modulo 5)
             if(cipherMode==CipherMode::Encrypt)
             {
-                outputText[i]   = key_[index1+((index1>19)?(-20):(5))];
-                outputText[i+1] = key_[index2+((index2>19)?(-20):(5))];
+                row1 = (row1 + 1) % 5;
+                row2 = (row2 + 1) % 5;
             }
             else
             {
-                outputText[i]   = key_[index1+((index1<5)?(20):(-5))];
-                outputText[i+1] = key_[index2+((index2<5)?(20):(-5))];
+                row1 = (5 + row1 - 1) % 5;
+                row2 = (5 + row2 - 1) % 5;
             }
         }
         else
         {
-            outputText[i]   = key_[index1+(index2%5-index1%5)];
-            outputText[i+1] = key_[index2-(index2%5-index1%5)];
+            // Rectangle/Square - so keep the rows the same and swap the columns
+            std::swap( column1, column2 );
         }
 
         //   - Find the letter associated with the new coords
+        index1 = 5*row1 + column1;
+        index2 = 5*row2 + column2;
+
+        //   - Make the replacements
+        outputText[i]   = key_[index1];
+        outputText[i+1] = key_[index2];
     }
 
     // return the text
